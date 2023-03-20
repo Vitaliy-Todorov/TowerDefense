@@ -18,6 +18,7 @@ public class TowerData : IHealthData
     [SerializeField] private float _attackRadius;
 
     public ETowerType TowerType => _towerType;
+
     public float Health
     {
         get => _health;
@@ -67,13 +68,23 @@ public class TowerData : IHealthData
             _shootingSpeed = value;
         }
     }
-}
 
-public interface IHealthData
-{
-    public event Action<float> UpdateHealth;
-    public event Action<float> UpdateRestoringHealth;
-    
-    public float Health { get; set; }
-    public float RestoringHealth  { get; set; }
+    private TowerData(ETowerType towerType)
+    {
+        _towerType = towerType;
+    }
+
+    public TowerData Clone()
+    {
+        TowerData towerData = new TowerData(_towerType)
+        {
+            _health = _health,
+            _restoringHealth = _restoringHealth,
+            _dameg = _dameg,
+            _shootingSpeed = _shootingSpeed,
+            _attackRadius = _attackRadius
+        };
+
+        return towerData;
+    }
 }

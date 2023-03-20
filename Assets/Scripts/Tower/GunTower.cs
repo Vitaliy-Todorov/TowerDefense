@@ -1,4 +1,3 @@
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -86,7 +85,7 @@ public class GunTower : MonoBehaviour
 
         foreach (GameObject enemy in enemies)
         {
-            distanceToEnemy = (transform.position - enemy.transform.position).magnitude;
+            distanceToEnemy = (transform.parent.position - enemy.transform.position).magnitude;
 
             if (distanceToEnemy < minDistanceToEnemy && distanceToEnemy < _attackRadius)
             {

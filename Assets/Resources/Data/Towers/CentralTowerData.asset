@@ -19,7 +19,7 @@ MonoBehaviour:
   Data:
     _towerType: 1
     _health: 10
-    _restoringHealth: 1
-    _dameg: 2
-    _shootingSpeed: 0.8
-    _attackRadius: 5
+    _restoringHealth: 2
+    _dameg: 4
+    _shootingSpeed: 0.7
+    _attackRadius: 3

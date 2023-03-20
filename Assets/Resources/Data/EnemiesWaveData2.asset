@@ -16,4 +16,4 @@ MonoBehaviour:
   TimeBetweenWaves: 5
   TimeWave: 5
   SpawnPoint: {x: -10, y: 0.5, z: 10}
-  TimeBetweenSpawnOfEnemies: 0.5
+  TimeBetweenSpawnOfEnemies: 0.7

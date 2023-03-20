@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -12,16 +13,16 @@ public class SpawnOfWorld : MonoBehaviour
     {
         _world.StaticDataService = new StaticDataService();
         _world.GeneralData = new GeneralData(_world);
-        
-        _world.EnemiesSpawner.Construct(_world);
-
-        _world.BuildTower.Construct(_world, _world.StaticDataService);
+        _world.SystemOfSelectingObjects = new SystemOfSelectingObjects(_world);
 
         foreach (var (towerType, towerStaticData) in _world.StaticDataService.TowersStaticData)
-            _world.GeneralData.TowersData.Add(towerType, towerStaticData.Data);
+            _world.GeneralData.TowersData.Add(towerType, towerStaticData.Data.Clone());
         
         foreach (var (enemyType, towerStaticData) in _world.StaticDataService.EnemiesStaticData)
-            _world.GeneralData.EnemiesData.Add(enemyType, towerStaticData.Data);
+            _world.GeneralData.EnemiesData.Add(enemyType, towerStaticData.Data.Clone());
+        
+        _world.EnemiesSpawner.Construct(_world);
+        _world.BuildTower.Construct(_world, _world.StaticDataService);
 
         _world.CentralTower.GetComponent<TowerController>()
             .Construct(_world, _world.GeneralData.TowersData[ETowerType.CentralTower]);

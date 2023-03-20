@@ -28,7 +28,7 @@ public class WeaponsAttack : MonoBehaviour
 
     private IEnumerator Shot()
     {
-        while (true)
+        while (_player != null)
         {
             float distanceToPlayer = (transform.position - _player.transform.position).magnitude;
 
