@@ -1,0 +1,20 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 98db41ff4bc845d6805b706315c357ba, type: 3}
+  m_Name: GeneralStaticData
+  m_EditorClassIdentifier: 
+  ColorsOfTile:
+  - {r: 0.3773585, g: 0.25900832, b: 0.18333928, a: 0.5019608}
+  - {r: 0.22308344, g: 1, b: 0.2117647, a: 0.5019608}
+  - {r: 1, g: 0.97878116, b: 0.3443396, a: 0.5019608}
+  BasicPrefabTile: {fileID: 9087125043950296919, guid: faeb505609a6a15449fdad3af60d50a0,
+    type: 3}
