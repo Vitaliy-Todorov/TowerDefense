@@ -20,14 +20,15 @@ public class GridGraph
     public void UnavailableNod(int x, int y) => 
         Gride[x, y].Available = false;
 
-    public Queue<Vector2Int> FindingPath(Vector2Int start, Vector2Int finish)
+    public Stack<Vector2Int> FindingPath(Vector2Int start, Vector2Int finish)
     {
+        Stack<Node> currenNodes = new Stack<Node>();
+        
         finish += Vector2Int.one;
-        Queue<Vector2Int> path = new Queue<Vector2Int>();
-        Node currenNode = Gride[start.x, start.y];
-        path.Enqueue(currenNode.Position);
-        currenNode.Checked = true;
-
+        Stack<Vector2Int> path = new Stack<Vector2Int>();
+        currenNodes.Push(Gride[start.x, start.y]);
+        Gride[start.x, start.y].Checked = true;
+        
         Stack<Vector2Int> neighborsOfNode = new Stack<Vector2Int>();
         neighborsOfNode.Push(new Vector2Int(1, 1));
         neighborsOfNode.Push(new Vector2Int(1, 0));
@@ -37,74 +38,89 @@ public class GridGraph
         neighborsOfNode.Push(new Vector2Int(-1, 0));
         neighborsOfNode.Push(new Vector2Int(-1, 1));
         neighborsOfNode.Push(new Vector2Int(0, 1));
-
-        while (currenNode.Position != finish)
+        
+        float minPathLength;
+        (Stack<Node>, float) currenNodesTuple = (currenNodes, float.MaxValue);
+        
+        while (currenNodes.Peek().Position != finish)
         {
-            float minPathLength = float.MaxValue;
-            Node minNod = null;
-
-            foreach (Vector2Int neighborOfNode in neighborsOfNode)
-            {
-                Vector2Int positionBeingChecked = currenNode.Position + neighborOfNode;
-                if (positionBeingChecked.x < 0
-                    || positionBeingChecked.y < 0
-                    || positionBeingChecked.x >= Gride.GetLength(0)
-                    || positionBeingChecked.y >= Gride.GetLength(1))
-                    continue;
-                
-                Node nodeBeingChecked = Gride[positionBeingChecked.x, positionBeingChecked.y];
-                
-                if(nodeBeingChecked.Checked || !nodeBeingChecked.Available)
-                    continue;
-                nodeBeingChecked.Checked = true;
-                
-                float movLength = Heuristics(neighborOfNode);
-                float pathLengthBeingChecked =
-                    movLength + currenNode.LengthOfPathPassed + Heuristics(finish - positionBeingChecked);
-                if (minPathLength > pathLengthBeingChecked)
-                {
-                    minPathLength = pathLengthBeingChecked;
-                    minNod = nodeBeingChecked;
-                }
-            }
-
-            minNod.LengthOfPathPassed += Heuristics(minNod.Position - currenNode.Position);
-            minNod.Parent = currenNode;
-            currenNode = minNod;
+            minPathLength = float.MaxValue;
             
-            path.Enqueue(currenNode.Position);
+            foreach (Node currenNode in currenNodes)
+            {
+                currenNodesTuple = FindSuitableNeighbors(finish, neighborsOfNode, currenNode);
+                if (minPathLength > currenNodesTuple.Item2)
+                {
+                    currenNodes = currenNodesTuple.Item1;
+                    minPathLength = currenNodesTuple.Item2;
+                }
+                else if(minPathLength == currenNodesTuple.Item2)
+                    foreach (Node currenMinNode in currenNodesTuple.Item1)
+                        currenNodes.Push(currenMinNode);
+            }
+            
+            if (currenNodes.Peek().Position == start)
+                break;
+        }
+        
+        Node nodeOfPath = currenNodes.Pop();
+        
+        while (nodeOfPath.Position != start)
+        {
+            path.Push(nodeOfPath.Position);
+            nodeOfPath = nodeOfPath.Parent;
+        }
+        path.Push(nodeOfPath.Position);
+        
+        return path;
+    }
+
+    private (Stack<Node> minNods, float minPathLength) FindSuitableNeighbors(Vector2Int finish, Stack<Vector2Int> neighborsOfNode, Node currenNode)
+    {
+        Stack<Node> minNods = new Stack<Node>();
+        float minPathLength = float.MaxValue;
+
+        foreach (Vector2Int neighborOfNode in neighborsOfNode)
+        {
+            Vector2Int positionBeingChecked = currenNode.Position + neighborOfNode;
+            if (positionBeingChecked.x < 0
+                || positionBeingChecked.y < 0
+                || positionBeingChecked.x >= Gride.GetLength(0)
+                || positionBeingChecked.y >= Gride.GetLength(1))
+                continue;
+
+            Node nodeBeingChecked = Gride[positionBeingChecked.x, positionBeingChecked.y];
+
+            if (nodeBeingChecked.Checked || !nodeBeingChecked.Available)
+                continue;
+            nodeBeingChecked.Checked = true;
+
+            float movLength = Heuristics(neighborOfNode);
+            float pathLengthBeingChecked =
+                movLength + currenNode.LengthOfPathPassed + Heuristics(finish - positionBeingChecked);
+            if (minPathLength > pathLengthBeingChecked)
+            {
+                minPathLength = pathLengthBeingChecked;
+                minNods.Clear();
+                minNods.Push(nodeBeingChecked);
+            }
+            else if (minPathLength == pathLengthBeingChecked)
+            {
+                minNods.Push(nodeBeingChecked);
+            }
         }
 
-        return path;
+        foreach (Node minNod in minNods)
+        {
+            minNod.LengthOfPathPassed += Heuristics(minNod.Position - currenNode.Position);
+            minNod.Parent = currenNode;
+        }
+
+        return (minNods, minPathLength);
     }
 
     private float Heuristics(Vector2Int v)
     {
         return v.magnitude;
-    }
-}
-
-public class Node
-{
-    public readonly Vector2Int Position;
-    public bool Available;
-    public bool Checked;
-    public Node Parent;
-    public float LengthOfPathPassed;
-    public float EstimatedOfAllPath;
-    
-    public Node(int x, int y)
-    {
-        Position = new Vector2Int(x, y);
-        Available = true;
-        LengthOfPathPassed = 0;
-        EstimatedOfAllPath = float.MaxValue;
-    }
-
-    public void Clear()
-    {
-        Parent = null;
-        LengthOfPathPassed = 0;
-        EstimatedOfAllPath = 0;
     }
 }

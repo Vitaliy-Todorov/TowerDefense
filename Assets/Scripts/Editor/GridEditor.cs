@@ -48,7 +48,7 @@ public class GridEditor : Editor
                     newTile.name = $"Tile({x},{y})";
                     newTile.transform.position = new Vector3(x, 0, y);
                 }
-
+                
             EditorUtility.SetDirty(target);
         }
     }
