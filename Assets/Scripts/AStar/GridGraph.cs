@@ -4,6 +4,7 @@ using UnityEngine;
 public class GridGraph
 {
     private Node[,] Gride;
+    private Stack<Vector2Int> _neighborsOfNode;
 
     public GridGraph(int sizeX, int sizeY)
     {
@@ -15,6 +16,16 @@ public class GridGraph
         for (int x = 0; x < sizeX; x++)
         for (int y = 0; y < sizeY; y++)
             Gride[x, y] = new Node(x, y);
+        
+        _neighborsOfNode = new Stack<Vector2Int>();
+        _neighborsOfNode.Push(new Vector2Int(1, 1));
+        _neighborsOfNode.Push(new Vector2Int(1, 0));
+        _neighborsOfNode.Push(new Vector2Int(1, -1));
+        _neighborsOfNode.Push(new Vector2Int(0, -1));
+        _neighborsOfNode.Push(new Vector2Int(-1, -1));
+        _neighborsOfNode.Push(new Vector2Int(-1, 0));
+        _neighborsOfNode.Push(new Vector2Int(-1, 1));
+        _neighborsOfNode.Push(new Vector2Int(0, 1));
     }
 
     public void UnavailableNod(int x, int y) => 
@@ -22,22 +33,12 @@ public class GridGraph
 
     public Stack<Vector2Int> FindingPath(Vector2Int start, Vector2Int finish)
     {
-        Stack<Node> currenNodes = new Stack<Node>();
-        
         finish += Vector2Int.one;
         Stack<Vector2Int> path = new Stack<Vector2Int>();
+        
+        Stack<Node> currenNodes = new Stack<Node>();
         currenNodes.Push(Gride[start.x, start.y]);
         Gride[start.x, start.y].Checked = true;
-        
-        Stack<Vector2Int> neighborsOfNode = new Stack<Vector2Int>();
-        neighborsOfNode.Push(new Vector2Int(1, 1));
-        neighborsOfNode.Push(new Vector2Int(1, 0));
-        neighborsOfNode.Push(new Vector2Int(1, -1));
-        neighborsOfNode.Push(new Vector2Int(0, -1));
-        neighborsOfNode.Push(new Vector2Int(-1, -1));
-        neighborsOfNode.Push(new Vector2Int(-1, 0));
-        neighborsOfNode.Push(new Vector2Int(-1, 1));
-        neighborsOfNode.Push(new Vector2Int(0, 1));
         
         float minPathLength;
         (Stack<Node>, float) currenNodesTuple = (currenNodes, float.MaxValue);
@@ -48,7 +49,7 @@ public class GridGraph
             
             foreach (Node currenNode in currenNodes)
             {
-                currenNodesTuple = FindSuitableNeighbors(finish, neighborsOfNode, currenNode);
+                currenNodesTuple = FindSuitableNeighbors(finish, currenNode);
                 if (minPathLength > currenNodesTuple.Item2)
                 {
                     currenNodes = currenNodesTuple.Item1;
@@ -63,30 +64,20 @@ public class GridGraph
                 break;
         }
         
-        Node nodeOfPath = currenNodes.Pop();
-        
-        while (nodeOfPath.Position != start)
-        {
-            path.Push(nodeOfPath.Position);
-            nodeOfPath = nodeOfPath.Parent;
-        }
-        path.Push(nodeOfPath.Position);
-        
+        path = ReconstructPath(start, currenNodes);
+
         return path;
     }
 
-    private (Stack<Node> minNods, float minPathLength) FindSuitableNeighbors(Vector2Int finish, Stack<Vector2Int> neighborsOfNode, Node currenNode)
+    private (Stack<Node> minNods, float minPathLength) FindSuitableNeighbors(Vector2Int finish, Node currenNode)
     {
         Stack<Node> minNods = new Stack<Node>();
         float minPathLength = float.MaxValue;
 
-        foreach (Vector2Int neighborOfNode in neighborsOfNode)
+        foreach (Vector2Int neighborOfNode in _neighborsOfNode)
         {
             Vector2Int positionBeingChecked = currenNode.Position + neighborOfNode;
-            if (positionBeingChecked.x < 0
-                || positionBeingChecked.y < 0
-                || positionBeingChecked.x >= Gride.GetLength(0)
-                || positionBeingChecked.y >= Gride.GetLength(1))
+            if (NodeInGrid(positionBeingChecked))
                 continue;
 
             Node nodeBeingChecked = Gride[positionBeingChecked.x, positionBeingChecked.y];
@@ -119,8 +110,31 @@ public class GridGraph
         return (minNods, minPathLength);
     }
 
+    private bool NodeInGrid(Vector2Int positionBeingChecked)
+    {
+        return positionBeingChecked.x < 0
+               || positionBeingChecked.y < 0
+               || positionBeingChecked.x >= Gride.GetLength(0)
+               || positionBeingChecked.y >= Gride.GetLength(1);
+    }
+
     private float Heuristics(Vector2Int v)
     {
         return v.magnitude;
+    }
+
+    private Stack<Vector2Int> ReconstructPath(Vector2Int start, Stack<Node> currenNodes)
+    {
+        Stack<Vector2Int> path = new Stack<Vector2Int>();
+        
+        Node nodeOfPath = currenNodes.Pop();
+        while (nodeOfPath.Position != start)
+        {
+            path.Push(nodeOfPath.Position);
+            nodeOfPath = nodeOfPath.Parent;
+        }
+        path.Push(nodeOfPath.Position);
+
+        return path;
     }
 }
