@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 public class Node
@@ -5,6 +6,7 @@ public class Node
     public readonly Vector2Int Position;
     public bool Available;
     public bool Checked;
+    public Stack<Node> AvailableNeighbors;
     public Node Parent;
     public float LengthOfPathPassed;
     public float EstimatedOfAllPath;

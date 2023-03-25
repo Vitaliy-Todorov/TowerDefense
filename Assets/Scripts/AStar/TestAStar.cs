@@ -18,9 +18,10 @@ public class TestAStar : Editor
         if (GUILayout.Button("FindingPath"))
         {
             GridGraph gridGraph = new GridGraph(10, 10);
-            gridGraph.UnavailableNod(1, 1);
-            gridGraph.UnavailableNod(1, 2);
-            gridGraph.UnavailableNod(2, 1);
+            gridGraph.UnavailableNod(1, 3);
+            gridGraph.UnavailableNod(2, 3);
+            gridGraph.UnavailableNod(3, 3);
+            gridGraph.UnavailableNod(3, 2);
             gridGraph.UnavailableNod(3, 1);
 
             _path = gridGraph.FindingPath(new Vector2Int(0, 0), new Vector2Int(9, 9));

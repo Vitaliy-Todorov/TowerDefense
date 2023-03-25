@@ -46,21 +46,25 @@ public class GridGraph
         while (currenNodes.Peek().Position != finish)
         {
             minPathLength = float.MaxValue;
+
+            Stack<Node> nextNodes = new Stack<Node>();
             
             foreach (Node currenNode in currenNodes)
             {
                 currenNodesTuple = FindSuitableNeighbors(finish, currenNode);
                 if (minPathLength > currenNodesTuple.Item2)
                 {
-                    currenNodes = currenNodesTuple.Item1;
+                    nextNodes = currenNodesTuple.Item1;
                     minPathLength = currenNodesTuple.Item2;
                 }
                 else if(minPathLength == currenNodesTuple.Item2)
                     foreach (Node currenMinNode in currenNodesTuple.Item1)
-                        currenNodes.Push(currenMinNode);
+                        nextNodes.Push(currenMinNode);
             }
+
+            currenNodes = nextNodes;
             
-            if (currenNodes.Peek().Position == start)
+            if (currenNodes.Peek().Position == start && currenNodes.Count == 0)
                 break;
         }
         
@@ -71,9 +75,27 @@ public class GridGraph
 
     private (Stack<Node> minNods, float minPathLength) FindSuitableNeighbors(Vector2Int finish, Node currenNode)
     {
+        if (currenNode.AvailableNeighbors != null)
+            return FindSuitable(currenNode);
+        else
+            return FindNeighborsAndFindSuitable(finish, currenNode);
+    }
+
+    private (Stack<Node> minNods, float minPathLength) FindSuitable(Node currenNode)
+    {
         Stack<Node> minNods = new Stack<Node>();
         float minPathLength = float.MaxValue;
+        foreach (Node nodeBeingChecked in currenNode.AvailableNeighbors)
+            MinPathLength(ref minPathLength, nodeBeingChecked, minNods);
+        return (minNods, minPathLength);
+    }
 
+    private (Stack<Node> minNods, float minPathLength) FindNeighborsAndFindSuitable(Vector2Int finish, Node currenNode)
+    {
+        Stack<Node> minNods = new Stack<Node>();
+        float minPathLength = float.MaxValue;
+        
+        currenNode.AvailableNeighbors = new Stack<Node>();
         foreach (Vector2Int neighborOfNode in _neighborsOfNode)
         {
             Vector2Int positionBeingChecked = currenNode.Position + neighborOfNode;
@@ -84,30 +106,31 @@ public class GridGraph
 
             if (nodeBeingChecked.Checked || !nodeBeingChecked.Available)
                 continue;
+
+            nodeBeingChecked.LengthOfPathPassed += Heuristics(neighborOfNode);
+            nodeBeingChecked.EstimatedOfAllPath = currenNode.LengthOfPathPassed + Heuristics(finish - positionBeingChecked);
+            nodeBeingChecked.Parent = currenNode;
             nodeBeingChecked.Checked = true;
+            currenNode.AvailableNeighbors.Push(nodeBeingChecked);
 
-            float movLength = Heuristics(neighborOfNode);
-            float pathLengthBeingChecked =
-                movLength + currenNode.LengthOfPathPassed + Heuristics(finish - positionBeingChecked);
-            if (minPathLength > pathLengthBeingChecked)
-            {
-                minPathLength = pathLengthBeingChecked;
-                minNods.Clear();
-                minNods.Push(nodeBeingChecked);
-            }
-            else if (minPathLength == pathLengthBeingChecked)
-            {
-                minNods.Push(nodeBeingChecked);
-            }
-        }
-
-        foreach (Node minNod in minNods)
-        {
-            minNod.LengthOfPathPassed += Heuristics(minNod.Position - currenNode.Position);
-            minNod.Parent = currenNode;
+            MinPathLength(ref minPathLength, nodeBeingChecked, minNods);
         }
 
         return (minNods, minPathLength);
+    }
+
+    private void MinPathLength(ref float minPathLength, Node nodeBeingChecked, Stack<Node> minNods)
+    {
+        if (minPathLength > nodeBeingChecked.EstimatedOfAllPath)
+        {
+            minPathLength = nodeBeingChecked.EstimatedOfAllPath;
+            minNods.Clear();
+            minNods.Push(nodeBeingChecked);
+        }
+        else if (minPathLength == nodeBeingChecked.EstimatedOfAllPath)
+        {
+            minNods.Push(nodeBeingChecked);
+        }
     }
 
     private bool NodeInGrid(Vector2Int positionBeingChecked)
