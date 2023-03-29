@@ -1,21 +1,29 @@
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
-public class GridGraph
+public class GridGraph : MonoBehaviour
 {
+    public List<TileSpawnMarker> TileGrid;
     private Node[,] Gride;
     private Stack<Vector2Int> _neighborsOfNode;
 
-    public GridGraph(int sizeX, int sizeY)
+    public void Construct(int sizeX, int sizeY)
     {
         sizeX += 1;
         sizeY += 1;
-        
+
         Gride = new Node[sizeX, sizeY];
-        
+
         for (int x = 0; x < sizeX; x++)
         for (int y = 0; y < sizeY; y++)
             Gride[x, y] = new Node(x, y);
+
+        TileGrid = GetComponentsInChildren<TileSpawnMarker>().ToList();
+        
+        foreach (TileSpawnMarker tileSpawnMarker in TileGrid)
+            if (tileSpawnMarker.TileType != ETileType.PathOfEnemies)
+                UnavailableNod(tileSpawnMarker.Position.x, tileSpawnMarker.Position.y);
         
         _neighborsOfNode = new Stack<Vector2Int>();
         _neighborsOfNode.Push(new Vector2Int(1, 1));
@@ -31,6 +39,90 @@ public class GridGraph
     public void UnavailableNod(int x, int y) => 
         Gride[x, y].Available = false;
 
+    public Stack<Vector2Int> _FindingPath(Vector2Int start, Vector2Int finish)
+    {
+        finish += Vector2Int.one;
+        List<Node> edge = new List<Node>();
+
+        edge.Add(Gride[start.x, start.y]);
+        Gride[start.x, start.y].Checked = true;
+
+        int cycle = 0;
+
+        Vector2Int currenNodePosition = start;
+        float minPathLength = float.MaxValue;
+        Stack<Node> nextNodes = new Stack<Node>();
+        // while (currenNodePosition != finish)
+        while (edge.Last().Position != finish)
+        {
+            cycle++;
+            if (edge.Count > 400 || cycle > 1000)
+                break;
+            
+            minPathLength = float.MaxValue;
+            int edgeCount = edge.Count;
+            for (int i = edgeCount - 1; i >= 0; i--)
+            {
+                (Stack<Node> minNods, float minPathLength) currenNodesTuple = _FindNeighborsAndFindSuitable(finish, edge[i]);
+                if (minPathLength > currenNodesTuple.minPathLength)
+                {
+                    nextNodes = currenNodesTuple.minNods;
+                    minPathLength = currenNodesTuple.minPathLength;
+                }
+                else if(minPathLength == currenNodesTuple.minPathLength)
+                    foreach (Node currenMinNode in currenNodesTuple.minNods)
+                        nextNodes.Push(currenMinNode);
+            }
+
+            foreach (Node currenNode in nextNodes)
+            {
+                //edge.Remove(currenNode.Parent);
+                if(currenNode.Checked == true)
+                    continue;
+                edge.Add(currenNode);
+                currenNode.Checked = true;
+            }
+        }
+
+        Stack<Vector2Int> path = ReconstructPath(start, edge.Last());
+        return path;
+    }
+
+    private (Stack<Node> minNods, float minPathLength) _FindNeighborsAndFindSuitable(Vector2Int finish, Node currenNode)
+    {
+        Stack<Node> minNods = new Stack<Node>();
+        float minPathLength = float.MaxValue;
+        
+        foreach (Vector2Int neighborOfNode in _neighborsOfNode)
+        {
+            Vector2Int positionBeingChecked = currenNode.Position + neighborOfNode;
+            if (NodeInGrid(positionBeingChecked))
+                continue;
+            
+            Node nodeBeingChecked = Gride[positionBeingChecked.x, positionBeingChecked.y];
+            
+            //if (nodeBeingChecked.Checked || !nodeBeingChecked.Available)
+            if (nodeBeingChecked.Checked || !nodeBeingChecked.Available)
+                continue;
+            
+            float lengthOfPathPassed = currenNode.LengthOfPathPassed + Heuristics(neighborOfNode);
+            float estimatedOfAllPath = lengthOfPathPassed + Heuristics(finish - positionBeingChecked);
+            
+            if(estimatedOfAllPath <= nodeBeingChecked.EstimatedOfAllPath)
+            {
+                nodeBeingChecked.LengthOfPathPassed = lengthOfPathPassed;
+                nodeBeingChecked.EstimatedOfAllPath = estimatedOfAllPath;
+                nodeBeingChecked.Parent = currenNode;
+            }
+            else
+                continue;
+
+            MinPathLength(ref minPathLength, nodeBeingChecked, minNods);
+        }
+        
+        return (minNods, minPathLength);
+    }
+    
     public Stack<Vector2Int> FindingPath(Vector2Int start, Vector2Int finish)
     {
         finish += Vector2Int.one;
@@ -68,7 +160,7 @@ public class GridGraph
                 break;
         }
         
-        path = ReconstructPath(start, currenNodes);
+        path = ReconstructPath(start, currenNodes.Peek());
 
         return path;
     }
@@ -146,11 +238,11 @@ public class GridGraph
         return v.magnitude;
     }
 
-    private Stack<Vector2Int> ReconstructPath(Vector2Int start, Stack<Node> currenNodes)
+    private Stack<Vector2Int> ReconstructPath(Vector2Int start, Node currenNodes)
     {
         Stack<Vector2Int> path = new Stack<Vector2Int>();
         
-        Node nodeOfPath = currenNodes.Pop();
+        Node nodeOfPath = currenNodes;
         while (nodeOfPath.Position != start)
         {
             path.Push(nodeOfPath.Position);
