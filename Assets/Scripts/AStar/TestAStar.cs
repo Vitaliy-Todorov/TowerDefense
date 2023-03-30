@@ -18,8 +18,8 @@ public class TestAStar : Editor
         
         if (GUILayout.Button("FindingPath"))
         {
-            LevelData levelData = Resources.Load<LevelData>("Data/Levels/Level1/LevelData");
-            grid.Construct(levelData.GridSize.x, levelData.GridSize.y);
+            // LevelData levelData = Resources.Load<LevelData>("Data/Levels/Level1/LevelData");
+            grid.Construct();
 
             _path = grid._FindingPath(new Vector2Int(20, 20), new Vector2Int(9, 9));
 

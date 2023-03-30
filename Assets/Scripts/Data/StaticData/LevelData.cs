@@ -7,6 +7,6 @@ public class LevelData : ScriptableObject
     public string NameLevel;
     
     public Vector2Int GridSize;
-    public TileSpawnMarker[,] Grid;
+    public TileMarker[,] Grid;
     public GameObject GridGO;
 }

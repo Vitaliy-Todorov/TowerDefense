@@ -4,26 +4,23 @@ using UnityEngine;
 
 public class GridGraph : MonoBehaviour
 {
-    public List<TileSpawnMarker> TileGrid;
+    public Vector2Int Size;
+    public List<TileMarker> Tiles;
+    public TileMarker[,] TileGrid;
     private Node[,] Gride;
     private Stack<Vector2Int> _neighborsOfNode;
 
-    public void Construct(int sizeX, int sizeY)
+    public void Construct()
     {
-        sizeX += 1;
-        sizeY += 1;
+        Gride = new Node[Size.x, Size.y];
 
-        Gride = new Node[sizeX, sizeY];
-
-        for (int x = 0; x < sizeX; x++)
-        for (int y = 0; y < sizeY; y++)
+        for (int x = 0; x < Size.x; x++)
+        for (int y = 0; y < Size.y; y++)
             Gride[x, y] = new Node(x, y);
-
-        TileGrid = GetComponentsInChildren<TileSpawnMarker>().ToList();
         
-        foreach (TileSpawnMarker tileSpawnMarker in TileGrid)
-            if (tileSpawnMarker.TileType != ETileType.PathOfEnemies)
-                UnavailableNod(tileSpawnMarker.Position.x, tileSpawnMarker.Position.y);
+        foreach (TileMarker tileMarker in TileGrid)
+            if (tileMarker.TileType != ETileType.PathOfEnemies)
+                UnavailableNod(tileMarker.Position.x, tileMarker.Position.y);
         
         _neighborsOfNode = new Stack<Vector2Int>();
         _neighborsOfNode.Push(new Vector2Int(1, 1));

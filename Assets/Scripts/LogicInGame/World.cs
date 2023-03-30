@@ -10,6 +10,8 @@ public class World : MonoBehaviour
     public StaticDataService StaticDataService;
     public SystemOfSelectingObjects SystemOfSelectingObjects;
 
+    public GridGraph GridGraph;
+
     public Transform Counter;
     public TMP_Text ScoreText;
 

@@ -1,7 +1,9 @@
 using UnityEngine;
 
-public class TileSpawnMarker : MonoBehaviour
+public class TileMarker : MonoBehaviour
 {
     public ETileType TileType;
     public Vector2Int Position;
+
+    public GameObject gameObjectToTile;
 }

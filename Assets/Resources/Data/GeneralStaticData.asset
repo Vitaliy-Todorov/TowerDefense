@@ -18,3 +18,7 @@ MonoBehaviour:
   - {r: 1, g: 0.97878116, b: 0.3443396, a: 0.5019608}
   BasicPrefabTile: {fileID: 9087125043950296919, guid: faeb505609a6a15449fdad3af60d50a0,
     type: 3}
+  PrefabTile:
+  - {fileID: 9087125043950296919, guid: faeb505609a6a15449fdad3af60d50a0, type: 3}
+  - {fileID: 7721133317498760370, guid: 7435b694aac0f0f44b67b7db0c23b002, type: 3}
+  - {fileID: 2280750544723079665, guid: e9ce0858094549349aefc69479b5219e, type: 3}

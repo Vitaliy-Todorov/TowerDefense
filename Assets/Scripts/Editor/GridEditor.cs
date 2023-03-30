@@ -1,8 +1,8 @@
+using System.Linq;
 using UnityEditor;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
-[CustomEditor(typeof(LevelData))]
+[CustomEditor(typeof(GridGraph))]
 public class GridEditor : Editor
 {
     private const string GeneralStaticDataPath = "Data/GeneralStaticData";
@@ -12,38 +12,33 @@ public class GridEditor : Editor
     {
         base.OnInspectorGUI();
 
-        LevelData levelData = (LevelData) target;
-
+        GridGraph grid = (GridGraph) target;
+        
         if (GUILayout.Button("Create a new grid"))
         {
-            levelData.NameScene = SceneManager.GetActiveScene().name;
+            // levelData.NameScene = SceneManager.GetActiveScene().name;
             
             if (_generalStaticData == null)
                 _generalStaticData = Resources.Load<GeneralStaticData>(GeneralStaticDataPath);
 
-            if (levelData.GridGO == null) 
-                levelData.GridGO = new GameObject("Grid");
+            if (grid.TileGrid == null)
+                grid.TileGrid = new TileMarker[grid.Size.x, grid.Size.y];
+            
+            foreach (TileMarker tileMarker in grid.TileGrid) 
+                if(tileMarker != null)
+                    DestroyImmediate(tileMarker.gameObject);
+            
+            UpdateSizeGrid(grid);
 
-            if (levelData.Grid == null)
-                levelData.Grid = new TileSpawnMarker[levelData.GridSize.x, levelData.GridSize.y];
-
-            foreach (TileSpawnMarker tileSpawnMarker in levelData.Grid) 
-                if(tileSpawnMarker != null)
-                    DestroyImmediate(tileSpawnMarker.gameObject);
-
-            if (levelData.Grid.GetLength(0) != levelData.GridSize.x 
-                && levelData.Grid.GetLength(0) != levelData.GridSize.y)
-                levelData.Grid = new TileSpawnMarker[levelData.GridSize.x, levelData.GridSize.y];
-
-            for (int x = 0; x < levelData.GridSize.x; x++)
-                for (int y = 0; y < levelData.GridSize.y; y++)
+            for (int x = 0; x < grid.Size.x; x++)
+                for (int y = 0; y < grid.Size.y; y++)
                 {
                     GameObject newTile = Instantiate(_generalStaticData.BasicPrefabTile);
+
+                    grid.TileGrid[x,y] = newTile.AddComponent<TileMarker>();
+                    grid.TileGrid[x, y].Position = new Vector2Int(x, y);
                     
-                    levelData.Grid[x,y] = newTile.AddComponent<TileSpawnMarker>();
-                    levelData.Grid[x, y].Position = new Vector2Int(x, y);
-                    
-                    newTile.transform.SetParent(levelData.GridGO.transform);
+                    newTile.transform.SetParent(grid.transform);
                     
                     newTile.name = $"Tile({x},{y})";
                     newTile.transform.position = new Vector3(x, 0, y);
@@ -51,5 +46,25 @@ public class GridEditor : Editor
                 
             EditorUtility.SetDirty(target);
         }
+
+        if (GUILayout.Button("Update the grid"))
+        {
+            TileMarker[] tileGrid = grid.GetComponentsInChildren<TileMarker>();
+            
+            if(grid.TileGrid == null)
+                grid.TileGrid = new TileMarker[grid.Size.x, grid.Size.y];
+            
+            UpdateSizeGrid(grid);
+            
+            foreach (TileMarker tileMarker in tileGrid) 
+                grid.TileGrid[tileMarker.Position.x, tileMarker.Position.y] = tileMarker;
+        }
+    }
+
+    private static void UpdateSizeGrid(GridGraph grid)
+    {
+        if (grid.TileGrid.GetLength(0) != grid.Size.x
+            && grid.TileGrid.GetLength(0) != grid.Size.y)
+            grid.TileGrid = new TileMarker[grid.Size.x, grid.Size.y];
     }
 }
