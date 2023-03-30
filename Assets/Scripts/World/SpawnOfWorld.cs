@@ -16,7 +16,7 @@ public class SpawnOfWorld : MonoBehaviour
         _world.SystemOfSelectingObjects = new SystemOfSelectingObjects(_world);
         
         // _world.GridGraph.Construct();
-        GridSpawn.SpawnOfWorld(_world);
+        //GridSpawn.SpawnOfWorld(_world);
 
         foreach (var (towerType, towerStaticData) in _world.StaticDataService.TowersStaticData)
             _world.GeneralData.TowersData.Add(towerType, towerStaticData.Data.Clone());
