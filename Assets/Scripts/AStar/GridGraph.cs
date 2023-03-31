@@ -5,7 +5,6 @@ using UnityEngine;
 public class GridGraph : MonoBehaviour
 {
     public Vector2Int Size;
-    public List<TileMarker> Tiles;
     public TileMarker[,] TileGrid;
     private Node[,] Gride;
     private Stack<Vector2Int> _neighborsOfNode;
@@ -13,6 +12,7 @@ public class GridGraph : MonoBehaviour
     public void Construct()
     {
         Gride = new Node[Size.x, Size.y];
+        UpdateTileGrid();
 
         for (int x = 0; x < Size.x; x++)
         for (int y = 0; y < Size.y; y++)
@@ -31,6 +31,22 @@ public class GridGraph : MonoBehaviour
         _neighborsOfNode.Push(new Vector2Int(-1, 0));
         _neighborsOfNode.Push(new Vector2Int(-1, 1));
         _neighborsOfNode.Push(new Vector2Int(0, 1));
+    }
+    
+    private void UpdateTileGrid()
+    {
+        TileMarker[] tileGrid = GetComponentsInChildren<TileMarker>();
+            
+        if(TileGrid == null)
+            TileGrid = new TileMarker[Size.x, Size.y];
+            
+        if (TileGrid == null
+            &&TileGrid.GetLength(0) != Size.x
+            && TileGrid.GetLength(0) != Size.y)
+            TileGrid = new TileMarker[Size.x, Size.y];
+            
+        foreach (TileMarker tileMarker in tileGrid) 
+            TileGrid[tileMarker.Position.x, tileMarker.Position.y] = tileMarker;
     }
 
     public void UnavailableNod(int x, int y) => 

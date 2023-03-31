@@ -10,7 +10,7 @@ public class GridSpawn
         {
             Object.Destroy(tileMarker.gameObjectToTile);
             GameObject prefabTile = world.StaticDataService.GeneralStaticData.GetTile(tileMarker.TileType);
-            Object.Instantiate(prefabTile, tileMarker.transform);
+            tileMarker.gameObjectToTile = Object.Instantiate(prefabTile, tileMarker.transform);
         }
-    }
+    } 
 }

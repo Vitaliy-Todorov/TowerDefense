@@ -1,6 +1,7 @@
 public enum ETileType
 {
     None = 0,
-    BuildTower = None + 1,
+    Basic = None + 1,
+    BuildTower = Basic + 1,
     PathOfEnemies = BuildTower + 1,
 }

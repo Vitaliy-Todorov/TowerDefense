@@ -35,7 +35,7 @@ public class GridEditor : Editor
                 {
                     GameObject newTile = Instantiate(_generalStaticData.BasicPrefabTile);
 
-                    grid.TileGrid[x,y] = newTile.AddComponent<TileMarker>();
+                    grid.TileGrid[x,y] = newTile.GetComponent<TileMarker>();
                     grid.TileGrid[x, y].Position = new Vector2Int(x, y);
                     
                     newTile.transform.SetParent(grid.transform);
